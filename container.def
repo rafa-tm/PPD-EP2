@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: ufscar/ubuntu_mpich:latest
+
+%help
+    Aplicação de exemplo para o uso de PTHREADS.
+
+%files
+   ./app/. /opt
+
+%post
+    echo "Compiling programs..."
+    cd /opt && make
+    cp laplace_seq laplace_pth /usr/bin/
+
+%runscript
+    exec $@

@@ -1,6 +1,5 @@
 /*
     This program solves Laplace's equation on a regular 2D grid using simple Jacobi iteration.
-
     The stencil calculation stops when  ( err >= CONV_THRESHOLD OR  iter > ITER_MAX )
 */
 #include <stdio.h>

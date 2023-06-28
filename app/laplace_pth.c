@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
+#include <pthread.h>
 
 #define ITER_MAX 3000 // number of maximum iterations
 #define CONV_THRESHOLD 1.0e-5f // threshold of convergence
@@ -19,6 +20,12 @@ double **new_grid;
 
 // size of each side of the grid
 int size;
+
+// number of threads
+int num_threads;
+
+// array for the numbers of iterations of each thread
+int iter_threads[100];
 
 // return the maximum value
 double max(double a, double b){
@@ -68,7 +75,7 @@ void initialize_grid(){
 void save_grid(){
 
     char file_name[30];
-    sprintf(file_name, "grid_laplace.txt");
+    sprintf(file_name, "grid_pth.txt");
 
     // save the result
     FILE *file;
@@ -84,11 +91,16 @@ void save_grid(){
     fclose(file);
 }
 
+pthread_barrier_t barrier;
+pthread_barrier_t barrier2;
+void *calc_laplace_parallel(void *);
+
 int main(int argc, char *argv[]){
 
-    if(argc != 2){
-        printf("Usage: ./laplace_seq N\n");
+    if(argc != 3){
+        printf("Usage: ./laplace_seq N T\n");
         printf("N: The size of each side of the domain (grid)\n");
+        printf("T: The number of threads\n");
         exit(-1);
     }
 
@@ -97,6 +109,7 @@ int main(int argc, char *argv[]){
     struct timeval time_end;
 
     size = atoi(argv[1]);
+    num_threads = atoi(argv[2]);
 
     // allocate memory to the grid (matrix)
     allocate_memory();
@@ -104,7 +117,12 @@ int main(int argc, char *argv[]){
     // set grid initial conditions
     initialize_grid();
 
-    double err = 1.0;
+    // create an array of p_threads 
+    pthread_t threads[num_threads];
+   
+    // store each thread ID
+    int t_id[num_threads];
+
     int iter = 0;
 
     printf("Jacobi relaxation calculation: %d x %d grid\n", size, size);
@@ -112,46 +130,85 @@ int main(int argc, char *argv[]){
     // get the start time
     gettimeofday(&time_start, NULL);
 
-    // Jacobi iteration
-    // This loop will end if either the maximum change reaches below a set threshold (convergence)
-    // or a fixed number of maximum iterations have completed
-    while ( iter <= ITER_MAX ) {
-
-        // calculates the Laplace equation to determine each cell's next value
-        // kernel 1
-        for( int i = 1; i < size-1; i++) {
-            for(int j = 1; j < size-1; j++) {
-
-                new_grid[i][j] = 0.25 * (grid[i][j+1] + grid[i][j-1] +
-                                         grid[i-1][j] + grid[i+1][j]);
-
-            }
-        }
-
-        // copy the next values into the working array for the next iteration
-        // kernel 2
-        for( int i = 1; i < size-1; i++) {
-            for( int j = 1; j < size-1; j++) {
-                grid[i][j] = new_grid[i][j];
-            }
-        }
-
-        if(iter % 100 == 0)
-            printf("Iteration %d\n", iter);
-
-        iter++;
+    // initialize the barriers
+    pthread_barrier_init(&barrier, NULL, num_threads);
+    pthread_barrier_init(&barrier2, NULL, num_threads);
+    
+    // create the threads
+    for(int i = 0; i < num_threads; i++){
+        t_id[i] = i;
+        pthread_create(&threads[i], NULL, calc_laplace_parallel, (void *) &t_id[i]);
     }
+
+    // wait for the threads to finish
+    for(int i = 0; i < num_threads; i++){
+        pthread_join(threads[i], NULL);
+    }
+
 
     // get the end time
     gettimeofday(&time_end, NULL);
 
+    
     double exec_time = (double) (time_end.tv_sec - time_start.tv_sec) +
                        (double) (time_end.tv_usec - time_start.tv_usec) / 1000000.0;
 
     //save the final grid in file
     save_grid();
 
-    printf("\nKernel executed in %lf seconds with %d iterations \n", exec_time, iter);
+
+    printf("\nExecutado em %lf segundos, iterações\n", exec_time);
+    for(int i = 0; i < num_threads; i++){
+        printf("Thread %d: %d iterações\n", i, iter_threads[i]);
+        iter += iter_threads[i];
+    }
+    printf("Total de iterações: %d\n", iter);
 
     return 0;
+}
+
+
+void *calc_laplace_parallel(void *args){
+
+    // thread id
+    int id = *(int *) args;
+    
+    // calcute start and end step of the thread
+    int start = id * (size / num_threads);
+    int end = start + (size / num_threads);
+
+    int iter = 0;
+
+    // the last thread might have more work if the size is not divisible by the number of threads
+    if( id == num_threads-1 )
+        end = size - 2;
+
+    while ( iter <= ITER_MAX ) {
+        // kernel 1
+
+        for( int i = start + 1; i <= end; i++) {
+            for(int j = 1; j < size-1; j++) {
+
+                new_grid[i][j] = 0.25 * (grid[i][j+1] + grid[i][j-1] +
+                                            grid[i-1][j] + grid[i+1][j]);
+
+            }
+        }
+
+        pthread_barrier_wait(&barrier);
+
+        // kernel 2
+
+        for( int i = start + 1; i <= end; i++) {
+            for( int j = 1; j < size-1; j++) {
+                grid[i][j] = new_grid[i][j];
+            }
+        }
+        
+        pthread_barrier_wait(&barrier2); 
+        iter++;
+    }
+
+    iter_threads[id] = iter;
+    pthread_exit(NULL);
 }
