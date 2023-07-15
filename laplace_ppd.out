@@ -1,0 +1,89 @@
+    
+*** SEQUENTIAL ***
+Jacobi relaxation calculation: 512 x 512 grid
+Kernel executed in 6.757232 seconds with 3001 iterations 
+    
+*** PTHREAD COM 1 THREADS ***
+Jacobi relaxation calculation: 512 x 512 grid
+Executado em 6.599077 segundos
+    
+*** PTHREAD COM 2 THREADS ***
+Jacobi relaxation calculation: 512 x 512 grid
+Executado em 3.391127 segundos
+    
+*** PTHREAD COM 5 THREADS ***
+Jacobi relaxation calculation: 512 x 512 grid
+Executado em 1.557824 segundos
+    
+*** PTHREAD COM 10 THREADS ***
+Jacobi relaxation calculation: 512 x 512 grid
+Executado em 1.025384 segundos
+    
+*** PTHREAD COM 20 THREADS ***
+Jacobi relaxation calculation: 512 x 512 grid
+Executado em 1.069890 segundos
+    
+*** PTHREAD COM 40 THREADS ***
+Jacobi relaxation calculation: 512 x 512 grid
+Executado em 1.359725 segundos
+    
+    
+*** SEQUENTIAL ***
+Jacobi relaxation calculation: 1024 x 1024 grid
+Kernel executed in 27.643625 seconds with 3001 iterations 
+    
+*** PTHREAD COM 1 THREADS ***
+Jacobi relaxation calculation: 1024 x 1024 grid
+Executado em 27.260786 segundos
+    
+*** PTHREAD COM 2 THREADS ***
+Jacobi relaxation calculation: 1024 x 1024 grid
+Executado em 13.582037 segundos
+    
+*** PTHREAD COM 5 THREADS ***
+Jacobi relaxation calculation: 1024 x 1024 grid
+Executado em 5.599868 segundos
+    
+*** PTHREAD COM 10 THREADS ***
+Jacobi relaxation calculation: 1024 x 1024 grid
+Executado em 3.084178 segundos
+    
+*** PTHREAD COM 20 THREADS ***
+Jacobi relaxation calculation: 1024 x 1024 grid
+Executado em 2.539546 segundos
+    
+*** PTHREAD COM 40 THREADS ***
+Jacobi relaxation calculation: 1024 x 1024 grid
+Executado em 2.835932 segundos
+    
+    
+    
+*** SEQUENTIAL ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Kernel executed in 111.344948 seconds with 3001 iterations 
+    
+*** PTHREAD COM 1 THREADS ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Executado em 109.626869 segundos
+    
+*** PTHREAD COM 2 THREADS ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Executado em 54.927261 segundos
+    
+*** PTHREAD COM 5 THREADS ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Executado em 22.054633 segundos
+    
+*** PTHREAD COM 10 THREADS ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Executado em 11.415185 segundos
+    
+*** PTHREAD COM 20 THREADS ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Executado em 8.805184 segundos
+    
+*** PTHREAD COM 40 THREADS ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Executado em 7.741458 segundos
+    
+    

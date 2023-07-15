@@ -7,13 +7,11 @@
 #SBATCH --output=%x.out          # Name of stdout output file - %j expands to jobId and %x to jobName
 #SBATCH --error=%x.err           # Name of stderr output file
 
-for i in {512, 1024, 2048};
+for i in {512,1024,2048};
  do
-    echo "*** TAMANHO $i x $i ***"
     echo "    "
     echo "*** SEQUENTIAL ***"
     srun singularity run container.sif pi_seq $i
-    echo "    "
     for j in {1,2,5,10,20,40};
         do
             echo "*** PTHREAD COM $j THREADS ***"

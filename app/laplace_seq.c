@@ -136,9 +136,6 @@ int main(int argc, char *argv[]){
             }
         }
 
-        if(iter % 100 == 0)
-            printf("Error of %0.10lf at iteration %d\n", err, iter);
-
         iter++;
     }
 
@@ -151,7 +148,7 @@ int main(int argc, char *argv[]){
     //save the final grid in file
     save_grid();
 
-    printf("\nKernel executed in %lf seconds with %d iterations and error of %0.10lf\n", exec_time, iter, err);
+    printf("\nKernel executed in %lf seconds with %d iterations \n", exec_time, iter);
 
     return 0;
 }

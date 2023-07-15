@@ -24,9 +24,6 @@ int size;
 // number of threads
 int num_threads;
 
-// array for the numbers of iterations of each thread
-int iter_threads[100];
-
 // return the maximum value
 double max(double a, double b){
     if(a > b)
@@ -156,14 +153,7 @@ int main(int argc, char *argv[]){
     //save the final grid in file
     save_grid();
 
-
-    printf("\nExecutado em %lf segundos, iterações\n", exec_time);
-    for(int i = 0; i < num_threads; i++){
-        printf("Thread %d: %d iterações\n", i, iter_threads[i]);
-        iter += iter_threads[i];
-    }
-    printf("Total de iterações: %d\n", iter);
-
+    printf("\nExecutado em %lf segundos\n", exec_time);
     return 0;
 }
 
@@ -209,6 +199,5 @@ void *calc_laplace_parallel(void *args){
         iter++;
     }
 
-    iter_threads[id] = iter;
     pthread_exit(NULL);
 }
