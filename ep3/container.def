@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: ufscar/ubuntu_mpich:latest
+
+%help
+    Aplicação de exemplo para o uso de OpenMP.
+
+%files
+   ./app/. /opt
+
+%post
+    echo "Compiling programs..."
+    cd /opt && make
+    cp laplace_seq laplace_omp laplace_omp_collapse /usr/bin/
+
+%runscript
+    exec $@
