@@ -62,13 +62,15 @@ void initialize_grid() {
 }
 
 // pthread function to calculate the Jacobi iteration for a portion of the grid
-void *calculate_jacobi(void *arg) {
-    int thread_id = *(int *)arg;
+// pthread function to calculate the Jacobi iteration for a portion of the grid
+void* calculate_jacobi(void* arg) {
+    int thread_id = *(int*)arg;
     int chunk_size = size / num_threads;
     int start_row = thread_id * chunk_size;
     int end_row = (thread_id == num_threads - 1) ? size - 1 : (thread_id + 1) * chunk_size;
 
-    double local_err = 0.0;
+    double* local_err_ptr = (double*)malloc(sizeof(double));
+    *local_err_ptr = 0.0;
 
     // calculates the Laplace equation to determine each cell's next value
     for (int i = start_row + 1; i < end_row; i++) {
@@ -76,12 +78,13 @@ void *calculate_jacobi(void *arg) {
             new_grid[i][j] = 0.25 * (grid[i][j + 1] + grid[i][j - 1] +
                                      grid[i - 1][j] + grid[i + 1][j]);
 
-            local_err = max(local_err, absolute(new_grid[i][j] - grid[i][j]));
+            *local_err_ptr = max(*local_err_ptr, absolute(new_grid[i][j] - grid[i][j]));
         }
     }
 
-    return (void *)local_err;
+    pthread_exit(local_err_ptr);
 }
+
 
 // save the grid in a file
 void save_grid() {
@@ -149,9 +152,10 @@ int main(int argc, char *argv[]) {
 
         // Join threads and collect local error values
         for (int t = 0; t < num_threads; t++) {
-            double *local_err_ptr;
-            pthread_join(threads[t], (void **)&local_err_ptr);
+            double* local_err_ptr;
+            pthread_join(threads[t], (void**)&local_err_ptr);
             err = max(err, *local_err_ptr);
+            free(local_err_ptr); // Free the memory allocated in the thread function
         }
 
         // copy the next values into the working array for the next iteration
@@ -160,6 +164,8 @@ int main(int argc, char *argv[]) {
                 grid[i][j] = new_grid[i][j];
             }
         }
+
+        
 
         iter++;
     }
