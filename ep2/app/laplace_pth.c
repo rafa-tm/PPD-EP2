@@ -1,8 +1,3 @@
-/*
-    This program solves Laplace's equation on a regular 2D grid using simple Jacobi iteration.
-
-    The stencil calculation stops when  iter > ITER_MAX
-*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -14,72 +9,91 @@
 
 // matrix to be solved
 double **grid;
-
-// auxiliary matrix
 double **new_grid;
 
 // size of each side of the grid
 int size;
 
-// number of threads
+// number of threads to use
 int num_threads;
 
 // return the maximum value
-double max(double a, double b){
-    if(a > b)
+double max(double a, double b) {
+    if (a > b)
         return a;
     return b;
 }
 
 // return the absolute value of a number
-double absolute(double num){
-    if(num < 0)
+double absolute(double num) {
+    if (num < 0)
         return -1.0 * num;
     return num;
 }
 
 // allocate memory for the grid
-void allocate_memory(){
-    grid = (double **) malloc(size * sizeof(double *));
-    new_grid = (double **) malloc(size * sizeof(double *));
+void allocate_memory() {
+    grid = (double **)malloc(size * sizeof(double *));
+    new_grid = (double **)malloc(size * sizeof(double *));
 
-    for(int i = 0; i < size; i++){
-        grid[i] = (double *) malloc(size * sizeof(double));
-        new_grid[i] = (double *) malloc(size * sizeof(double));
+    for (int i = 0; i < size; i++) {
+        grid[i] = (double *)malloc(size * sizeof(double));
+        new_grid[i] = (double *)malloc(size * sizeof(double));
     }
 }
 
 // initialize the grid
-void initialize_grid(){
+void initialize_grid() {
     // seed for random generator
     srand(10);
 
     int linf = size / 2;
     int lsup = linf + size / 10;
-    for (int i = 0; i < size; i++){
-        for (int j = 0; j < size; j++){
-            // inicializa região de calor no centro do grid
-            if ( i>=linf && i < lsup && j>=linf && j<lsup)
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            // initialize region of heat in the center of the grid
+            if (i >= linf && i < lsup && j >= linf && j < lsup)
                 grid[i][j] = 100;
             else
-               grid[i][j] = 0;
+                grid[i][j] = 0;
             new_grid[i][j] = 0.0;
         }
     }
 }
 
-// save the grid in a file
-void save_grid(){
+// pthread function to calculate the Jacobi iteration for a portion of the grid
+void *calculate_jacobi(void *arg) {
+    int thread_id = *(int *)arg;
+    int chunk_size = size / num_threads;
+    int start_row = thread_id * chunk_size;
+    int end_row = (thread_id == num_threads - 1) ? size - 1 : (thread_id + 1) * chunk_size;
 
+    double local_err = 0.0;
+
+    // calculates the Laplace equation to determine each cell's next value
+    for (int i = start_row + 1; i < end_row; i++) {
+        for (int j = 1; j < size - 1; j++) {
+            new_grid[i][j] = 0.25 * (grid[i][j + 1] + grid[i][j - 1] +
+                                     grid[i - 1][j] + grid[i + 1][j]);
+
+            local_err = max(local_err, absolute(new_grid[i][j] - grid[i][j]));
+        }
+    }
+
+    return (void *)local_err;
+}
+
+// save the grid in a file
+void save_grid() {
     char file_name[30];
-    sprintf(file_name, "grid_pth.txt");
+    sprintf(file_name, "grid_laplace.txt");
 
     // save the result
     FILE *file;
     file = fopen(file_name, "w");
 
-    for(int i = 0; i < size; i++){
-        for(int j = 0; j < size; j++){
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
             fprintf(file, "%lf ", grid[i][j]);
         }
         fprintf(file, "\n");
@@ -88,16 +102,12 @@ void save_grid(){
     fclose(file);
 }
 
-pthread_barrier_t barrier;
-pthread_barrier_t barrier2;
-void *calc_laplace_parallel(void *);
+int main(int argc, char *argv[]) {
 
-int main(int argc, char *argv[]){
-
-    if(argc != 3){
-        printf("Usage: ./laplace_seq N T\n");
+    if (argc != 3) {
+        printf("Usage: ./laplace_pthread N num_threads\n");
         printf("N: The size of each side of the domain (grid)\n");
-        printf("T: The number of threads\n");
+        printf("num_threads: Number of threads to use\n");
         exit(-1);
     }
 
@@ -114,12 +124,7 @@ int main(int argc, char *argv[]){
     // set grid initial conditions
     initialize_grid();
 
-    // create an array of p_threads 
-    pthread_t threads[num_threads];
-   
-    // store each thread ID
-    int t_id[num_threads];
-
+    double err = 1.0;
     int iter = 0;
 
     printf("Jacobi relaxation calculation: %d x %d grid\n", size, size);
@@ -127,77 +132,48 @@ int main(int argc, char *argv[]){
     // get the start time
     gettimeofday(&time_start, NULL);
 
-    // initialize the barriers
-    pthread_barrier_init(&barrier, NULL, num_threads);
-    pthread_barrier_init(&barrier2, NULL, num_threads);
-    
-    // create the threads
-    for(int i = 0; i < num_threads; i++){
-        t_id[i] = i;
-        pthread_create(&threads[i], NULL, calc_laplace_parallel, (void *) &t_id[i]);
-    }
+    // Jacobi iteration
+    // This loop will end if either the maximum change reaches below a set threshold (convergence)
+    // or a fixed number of maximum iterations have completed
+    while (err > CONV_THRESHOLD && iter <= ITER_MAX) {
 
-    // wait for the threads to finish
-    for(int i = 0; i < num_threads; i++){
-        pthread_join(threads[i], NULL);
-    }
+        err = 0.0;
+        pthread_t threads[num_threads];
+        int thread_ids[num_threads];
 
+        // Create threads
+        for (int t = 0; t < num_threads; t++) {
+            thread_ids[t] = t;
+            pthread_create(&threads[t], NULL, calculate_jacobi, &thread_ids[t]);
+        }
+
+        // Join threads and collect local error values
+        for (int t = 0; t < num_threads; t++) {
+            double *local_err_ptr;
+            pthread_join(threads[t], (void **)&local_err_ptr);
+            err = max(err, *local_err_ptr);
+        }
+
+        // copy the next values into the working array for the next iteration
+        for (int i = 1; i < size - 1; i++) {
+            for (int j = 1; j < size - 1; j++) {
+                grid[i][j] = new_grid[i][j];
+            }
+        }
+
+        iter++;
+    }
 
     // get the end time
     gettimeofday(&time_end, NULL);
 
-    
-    double exec_time = (double) (time_end.tv_sec - time_start.tv_sec) +
-                       (double) (time_end.tv_usec - time_start.tv_usec) / 1000000.0;
+    double exec_time = (double)(time_end.tv_sec - time_start.tv_sec) +
+                       (double)(time_end.tv_usec - time_start.tv_usec) / 1000000.0;
 
-    //save the final grid in file
+    // save the final grid in file
     save_grid();
 
-    printf("\nExecutado em %lf segundos\n", exec_time);
+    printf("\nKernel executed in %lf seconds with %d iterations \n", exec_time, iter);
+
     return 0;
-}
-
-
-void *calc_laplace_parallel(void *args){
-
-    // thread id
-    int id = *(int *) args;
-    
-    // calcute start and end step of the thread
-    int start = id * (size / num_threads);
-    int end = start + (size / num_threads);
-
-    int iter = 0;
-
-    // the last thread might have more work if the size is not divisible by the number of threads
-    if( id == num_threads-1 )
-        end = size - 2;
-
-    while ( iter <= ITER_MAX ) {
-        // kernel 1
-
-        for( int i = start + 1; i <= end; i++) {
-            for(int j = 1; j < size-1; j++) {
-
-                new_grid[i][j] = 0.25 * (grid[i][j+1] + grid[i][j-1] +
-                                            grid[i-1][j] + grid[i+1][j]);
-
-            }
-        }
-
-        pthread_barrier_wait(&barrier);
-
-        // kernel 2
-
-        for( int i = start + 1; i <= end; i++) {
-            for( int j = 1; j < size-1; j++) {
-                grid[i][j] = new_grid[i][j];
-            }
-        }
-        
-        pthread_barrier_wait(&barrier2); 
-        iter++;
-    }
-
-    pthread_exit(NULL);
 }
