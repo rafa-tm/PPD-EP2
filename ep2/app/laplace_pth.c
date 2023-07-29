@@ -115,7 +115,7 @@ int main(int argc, char *argv[]){
 
     int iter = 0;
 
-    printf("Jacobi relaxation calculation: %d x %d grid\n", size, size);
+    printf("Jacobi com: %d x %d grid\n", size, size);
 
     // get the start time
     gettimeofday(&time_start, NULL);
@@ -143,38 +143,23 @@ int main(int argc, char *argv[]){
     // save the final grid in a file
     save_grid();
 
-    printf("\nExecutado em %lf segundos\n", exec_time);
+    printf("Executado em %lf segundos\n", exec_time);
     return 0;
 }
 
 void *calc_laplace_parallel(void *args){
-    // thread id
+ 
     int id = *(int *) args;
     
-    // calculate start and end step of the thread
     int start = id * (size / num_threads);
     int end = start + (size / num_threads);
 
-    // handle the remaining elements for the last thread
     if (id == num_threads - 1)
         end = size - 1;
 
     int iter = 0;
-    double diff, max_diff;
 
     while (iter <= ITER_MAX) {
-        // Boundary condition update (top and bottom rows)
-        if (id == 0) {
-            for (int j = 1; j < size - 1; j++) {
-                new_grid[0][j] = 0.25 * (grid[0][j + 1] + grid[0][j - 1] + grid[1][j] + grid[size - 1][j]);
-            }
-        }
-
-        if (id == num_threads - 1) {
-            for (int j = 1; j < size - 1; j++) {
-                new_grid[size - 1][j] = 0.25 * (grid[size - 1][j + 1] + grid[size - 1][j - 1] + grid[0][j] + grid[size - 2][j]);
-            }
-        }
 
         // Jacobi iteration
         for (int i = start + 1; i <= end - 1; i++) {
@@ -186,30 +171,13 @@ void *calc_laplace_parallel(void *args){
         // Synchronize all threads before updating the grid
         pthread_barrier_wait(&barrier);
 
-        // Calculate the maximum difference between the grids
-        max_diff = 0.0;
-        for (int i = start + 1; i <= end - 1; i++) {
-            for (int j = 1; j < size - 1; j++) {
-                diff = absolute(new_grid[i][j] - grid[i][j]);
-                max_diff = max(max_diff, diff);
-            }
-        }
-
-        // Synchronize all threads before updating the grid and checking convergence
-        pthread_barrier_wait(&barrier);
-
-        // Copy the new_grid to grid for the next iteration
         for (int i = start + 1; i <= end - 1; i++) {
             for (int j = 1; j < size - 1; j++) {
                 grid[i][j] = new_grid[i][j];
             }
         }
-
-        // Check convergence
-        if (max_diff < CONV_THRESHOLD) {
-            break;
-        }
-
+        
+        pthread_barrier_wait(&barrier);
         iter++;
     }
 
