@@ -32,23 +32,28 @@ Flags:               fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cm
     
 *** SEQUENTIAL ***
 Jacobi relaxation calculation: 512 x 512 grid
-
 Kernel executed in 11.570842 seconds with 3001 iterations 
+
 *** PTHREAD COM 1 THREADS ***
 Jacobi com: 512 x 512 grid
 Executado em 6.793584 segundos
+
 *** PTHREAD COM 2 THREADS ***
 Jacobi com: 512 x 512 grid
 Executado em 3.483743 segundos
+
 *** PTHREAD COM 5 THREADS ***
 Jacobi com: 512 x 512 grid
 Executado em 1.550510 segundos
+
 *** PTHREAD COM 10 THREADS ***
 Jacobi com: 512 x 512 grid
 Executado em 1.391554 segundos
+
 *** PTHREAD COM 20 THREADS ***
 Jacobi com: 512 x 512 grid
 Executado em 1.499672 segundos
+
 *** PTHREAD COM 40 THREADS ***
 Jacobi com: 512 x 512 grid
 Executado em 1.074282 segundos
@@ -56,47 +61,57 @@ Executado em 1.074282 segundos
     
 *** SEQUENTIAL ***
 Jacobi relaxation calculation: 1024 x 1024 grid
-
 Kernel executed in 47.016700 seconds with 3001 iterations 
+
 *** PTHREAD COM 1 THREADS ***
 Jacobi com: 1024 x 1024 grid
 Executado em 28.286339 segundos
+
 *** PTHREAD COM 2 THREADS ***
 Jacobi com: 1024 x 1024 grid
 Executado em 13.831780 segundos
+
 *** PTHREAD COM 5 THREADS ***
 Jacobi com: 1024 x 1024 grid
 Executado em 5.570950 segundos
+
 *** PTHREAD COM 10 THREADS ***
 Jacobi com: 1024 x 1024 grid
 Executado em 3.072100 segundos
+
 *** PTHREAD COM 20 THREADS ***
 Jacobi com: 1024 x 1024 grid
 Executado em 2.680238 segundos
+
 *** PTHREAD COM 40 THREADS ***
 Jacobi com: 1024 x 1024 grid
 Executado em 3.157950 segundos
     
-    
+
 *** SEQUENTIAL ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-
 Kernel executed in 189.127672 seconds with 3001 iterations 
+
 *** PTHREAD COM 1 THREADS ***
 Jacobi com: 2048 x 2048 grid
 Executado em 114.280340 segundos
+
 *** PTHREAD COM 2 THREADS ***
 Jacobi com: 2048 x 2048 grid
 Executado em 55.895457 segundos
+
 *** PTHREAD COM 5 THREADS ***
 Jacobi com: 2048 x 2048 grid
 Executado em 22.075393 segundos
+
 *** PTHREAD COM 10 THREADS ***
 Jacobi com: 2048 x 2048 grid
 Executado em 11.700050 segundos
+
 *** PTHREAD COM 20 THREADS ***
 Jacobi com: 2048 x 2048 grid
 Executado em 9.694355 segundos
+
 *** PTHREAD COM 40 THREADS ***
 Jacobi com: 2048 x 2048 grid
 Executado em 7.591614 segundos
