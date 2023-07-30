@@ -135,9 +135,6 @@ int main(int argc, char *argv[]){
             }
         }
 
-        if(iter % 100 == 0)
-            printf("Iteration %d\n", iter);
-
         iter++;
     }
 
@@ -150,7 +147,7 @@ int main(int argc, char *argv[]){
     //save the final grid in file
     save_grid();
 
-    printf("\nKernel executed in %lf seconds with %d iterations \n", exec_time, iter);
+    printf("Kernel executed in %lf seconds with %d iterations \n", exec_time, iter);
 
     return 0;
 }

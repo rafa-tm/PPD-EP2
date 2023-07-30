@@ -83,10 +83,9 @@ void save_grid(){
 
 int main(int argc, char *argv[]){
 
-    if(argc != 3){
+    if(argc != 2){
         printf("Usage: ./laplace_seq N\n");
         printf("N: The size of each side of the domain (grid)\n");
-            printf("T: \n");
         exit(-1);
     }
 
@@ -136,8 +135,6 @@ int main(int argc, char *argv[]){
             }
         }
 
-        if (iter % 100 == 0)
-            printf("Iteration %d\n", iter);
 
         iter++;
     }
@@ -151,7 +148,7 @@ int main(int argc, char *argv[]){
     // save the final grid in file
     save_grid();
 
-    printf("\nKernel executed in %lf seconds with %d iterations \n", exec_time, iter);
+    printf("Kernel executed in %lf seconds with %d iterations \n", exec_time, iter);
 
     return 0;
 }

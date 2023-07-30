@@ -136,9 +136,6 @@ int main(int argc, char *argv[]){
             }
         }
 
-        if(iter % 100 == 0)
-            printf("Iteration %d\n", iter);
-
         iter++;
     }
 
