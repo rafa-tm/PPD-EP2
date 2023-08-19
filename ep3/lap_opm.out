@@ -12,7 +12,7 @@ CPU family:          23
 Model:               49
 Model name:          AMD EPYC 7452 32-Core Processor
 Stepping:            0
-CPU MHz:             3342.706
+CPU MHz:             3248.613
 BogoMIPS:            4691.12
 Virtualization:      AMD-V
 L1d cache:           32K
@@ -31,54 +31,62 @@ Flags:               fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cm
     
 *** SEQUENTIAL ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 112.033637 seconds with 3001 iterations
- 
+
+Kernel executed in 110.883240 seconds with 3001 iterations 
 *** OPENMP COM 1 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 114.831200 seconds with 3001 iterations 
+Kernel executed in 113.351145 seconds with 3001 iterations 
     
 *** OPENMP COLLAPSE COM 1 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 93.265167 seconds with 3001 iterations 
+Kernel executed in 90.719120 seconds with 3001 iterations 
     
 *** OPENMP COM 2 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 95.712818 seconds with 3001 iterations 
+Kernel executed in 56.700633 seconds with 3001 iterations 
     
 *** OPENMP COLLAPSE COM 2 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 89.054426 seconds with 3001 iterations 
+Kernel executed in 45.345190 seconds with 3001 iterations 
     
 *** OPENMP COM 5 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 99.513134 seconds with 3001 iterations 
+Kernel executed in 22.288132 seconds with 3001 iterations 
     
 *** OPENMP COLLAPSE COM 5 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 91.495636 seconds with 3001 iterations 
+Kernel executed in 18.484732 seconds with 3001 iterations 
     
 *** OPENMP COM 10 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 95.942569 seconds with 3001 iterations 
+Kernel executed in 18.655355 seconds with 3001 iterations 
     
 *** OPENMP COLLAPSE COM 10 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 89.017717 seconds with 3001 iterations 
+Kernel executed in 10.305726 seconds with 3001 iterations 
     
 *** OPENMP COM 20 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 96.595508 seconds with 3001 iterations 
+Kernel executed in 9.519758 seconds with 3001 iterations 
     
 *** OPENMP COLLAPSE COM 20 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 89.902130 seconds with 3001 iterations 
+Kernel executed in 8.814486 seconds with 3001 iterations 
     
 *** OPENMP COM 40 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 98.200524 seconds with 3001 iterations 
+Kernel executed in 4.906560 seconds with 3001 iterations 
     
 *** OPENMP COLLAPSE COM 40 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-Kernel executed in 90.964202 seconds with 3001 iterations 
+Kernel executed in 4.541408 seconds with 3001 iterations 
+    
+*** OPENMP COM 64 THREADS ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Kernel executed in 3.285723 seconds with 3001 iterations 
+    
+*** OPENMP COLLAPSE COM 64 THREADS ***
+Jacobi relaxation calculation: 2048 x 2048 grid
+Kernel executed in 3.049504 seconds with 3001 iterations 
     
     
