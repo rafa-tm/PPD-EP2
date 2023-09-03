@@ -31,8 +31,8 @@ Flags:               fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cm
     
 *** SEQUENTIAL ***
 Jacobi relaxation calculation: 2048 x 2048 grid
-
 Kernel executed in 110.883240 seconds with 3001 iterations 
+
 *** OPENMP COM 1 THREADS ***
 Jacobi relaxation calculation: 2048 x 2048 grid
 Kernel executed in 113.351145 seconds with 3001 iterations 

@@ -1,0 +1,16 @@
+Bootstrap: docker
+From: ufscar/ubuntu_mpich:latest
+
+%help
+    Aplicação de calculo de onda para o uso de OpenMP.
+
+%files
+   ./app/. /opt
+
+%post
+    echo "Compiling programs..."
+    cd /opt && make
+    cp wave_omp wave_seq /usr/bin/
+
+%runscript
+    exec $@
