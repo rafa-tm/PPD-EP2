@@ -13,13 +13,13 @@
 /*
  * save the matrix on a file.txt
  */
-void save_grid(int rows, int cols, float *matrix)
+void save_grid(int rows, int cols, float *matrix, int time)
 {
 
     system("mkdir -p wavefield");
 
     char file_name[64];
-    sprintf(file_name, "wavefield/wavefield.txt");
+    sprintf(file_name, "wavefield/wavefield_%d.txt", time);
 
     // save the result
     FILE *file;
@@ -39,7 +39,7 @@ void save_grid(int rows, int cols, float *matrix)
 
     fclose(file);
 
-    system("python3 plot.py");
+    //system("python3 plot.py");
 }
 
 int main(int argc, char *argv[])
@@ -159,6 +159,12 @@ int main(int argc, char *argv[])
         swap = next_base;
         next_base = prev_base;
         prev_base = swap;
+
+        // save the wavefield for each 100 iterations
+        if (n % 100 == 0)
+        {
+            save_grid(rows, cols, next_base, n);
+        }
     }
 
     // get the end time
@@ -166,7 +172,7 @@ int main(int argc, char *argv[])
 
     double exec_time = (double)(time_end.tv_sec - time_start.tv_sec) + (double)(time_end.tv_usec - time_start.tv_usec) / 1000000.0;
 
-    save_grid(rows, cols, next_base);
+    save_grid(rows, cols, next_base, 6000);
 
     printf("Executado em %f segundos com %d threads \n\n", exec_time, num_threads);
 

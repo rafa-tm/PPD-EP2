@@ -17,7 +17,7 @@ void save_grid(int rows, int cols, float *matrix){
     system("mkdir -p wavefield");
 
     char file_name[64];
-    sprintf(file_name, "wavefield/wavefield.txt");
+    sprintf(file_name, "wavefield/wavefield_seq.txt");
 
     // save the result
     FILE *file;
