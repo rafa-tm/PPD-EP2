@@ -5,49 +5,46 @@
 #include <omp.h>
 
 #define DT 0.0070710676f // delta t
-#define DX 15.0f         // delta x
-#define DY 15.0f         // delta y
-#define V 1500.0f        // wave velocity v = 1500 m/s
-#define HALF_LENGTH 1    // radius of the stencil
+#define DX 15.0f // delta x
+#define DY 15.0f // delta y
+#define V 1500.0f // wave velocity v = 1500 m/s
+#define HALF_LENGTH 1 // radius of the stencil
 
 /*
  * save the matrix on a file.txt
  */
-void save_grid(int rows, int cols, float *matrix, int time)
-{
+void save_grid(int rows, int cols, float *matrix){
 
     system("mkdir -p wavefield");
 
     char file_name[64];
-    sprintf(file_name, "wavefield/wavefield_%d.txt", time);
+    sprintf(file_name, "wavefield/wavefield_omp.txt");
 
     // save the result
     FILE *file;
     file = fopen(file_name, "w");
 
-    for (int i = 0; i < rows; i++)
-    {
+    for(int i = 0; i < rows; i++) {
 
         int offset = i * cols;
 
-        for (int j = 0; j < cols; j++)
-        {
+        for(int j = 0; j < cols; j++) {
             fprintf(file, "%f ", matrix[offset + j]);
         }
         fprintf(file, "\n");
     }
 
     fclose(file);
-
-    //system("python3 plot.py");
+    
+    // system("python3 plot.py --name wavefield_omp");
 }
 
-int main(int argc, char *argv[])
-{
 
-    if (argc != 5)
-    {
-        printf("Usage: ./stencil N1 N2 TIME\n");
+
+int main(int argc, char* argv[]) {
+
+    if(argc != 5){
+        printf("Usage: ./stencil N1 N2 TIME NUM_THREADS\n");
         printf("N1 N2: grid sizes for the stencil\n");
         printf("TIME: propagation time in ms\n");
         printf("NUM_THREADS: number of threads\n");
@@ -63,11 +60,12 @@ int main(int argc, char *argv[])
     // number of timesteps
     int time = atoi(argv[3]);
 
+    // number of threads
     int num_threads = atoi(argv[4]);
     omp_set_num_threads(num_threads);
-
+    
     // calc the number of iterations (timesteps)
-    int iterations = (int)((time / 1000.0) / DT);
+    int iterations = (int)((time/1000.0) / DT);
 
     // represent the matrix of wavefield as an array
     float *prev_base = malloc(rows * cols * sizeof(float));
@@ -81,21 +79,17 @@ int main(int argc, char *argv[])
 
     // ************* BEGIN INITIALIZATION *************
 
-    printf("Initializing ... \n");
-
     // define source wavelet
     float wavelet[12] = {0.016387336, -0.041464937, -0.067372555, 0.386110067,
-                         0.812723635, 0.416998396, 0.076488599, -0.059434419,
-                         0.023680172, 0.005611435, 0.001823209, -0.000720549};
+                         0.812723635, 0.416998396,  0.076488599,  -0.059434419,
+                         0.023680172, 0.005611435,  0.001823209,  -0.000720549};
 
     // initialize matrix
-    for (int i = 0; i < rows; i++)
-    {
+    for(int i = 0; i < rows; i++){
 
         int offset = i * cols;
 
-        for (int j = 0; j < cols; j++)
-        {
+        for(int j = 0; j < cols; j++){
             prev_base[offset + j] = 0.0f;
             next_base[offset + j] = 0.0f;
             vel_base[offset + j] = V * V;
@@ -103,21 +97,17 @@ int main(int argc, char *argv[])
     }
 
     // add a source to initial wavefield as an initial condition
-    for (int s = 11; s >= 0; s--)
-    {
-        for (int i = rows / 2 - s; i < rows / 2 + s; i++)
-        {
+    for(int s = 11; s >= 0; s--){
+        for(int i = rows / 2 - s; i < rows / 2 + s; i++){
 
             int offset = i * cols;
 
-            for (int j = cols / 2 - s; j < cols / 2 + s; j++)
+            for(int j = cols / 2 - s; j < cols / 2 + s; j++)
                 prev_base[offset + j] = wavelet[s];
         }
     }
 
     // ************** END INITIALIZATION **************
-
-    printf("Computing wavefield ... \n");
 
     float *swap;
 
@@ -132,49 +122,45 @@ int main(int argc, char *argv[])
     // get the start time
     gettimeofday(&time_start, NULL);
 
-    // wavefield modeling
-    for (int n = 0; n < iterations; n++)
+    #pragma omp parallel
     {
-#pragma omp parallel for collapse(2)
-        for (int i = HALF_LENGTH; i < rows - HALF_LENGTH; i++)
-        {
-            for (int j = HALF_LENGTH; j < cols - HALF_LENGTH; j++)
-            {
-                // index of the current point in the grid
-                int current = i * cols + j;
-
-                // neighbors in the horizontal direction
-                float value = (prev_base[current + 1] - 2.0 * prev_base[current] + prev_base[current - 1]) / dxSquared;
-
-                // neighbors in the vertical direction
-                value += (prev_base[current + cols] - 2.0 * prev_base[current] + prev_base[current - cols]) / dySquared;
-
-                value *= dtSquared * vel_base[current];
-
-                next_base[current] = 2.0 * prev_base[current] - next_base[current] + value;
+        // wavefield modeling
+        for(int n = 0; n < iterations; n++) {
+            #pragma omp for collapse(2)
+            for(int i = HALF_LENGTH; i < rows - HALF_LENGTH; i++) {
+                for(int j = HALF_LENGTH; j < cols - HALF_LENGTH; j++) {
+                      // index of the current point in the grid
+                    int current = i * cols + j;
+                    
+                    //  neighbors in the horizontal direction
+                    float value = (prev_base[current + 1] - 2.0 * prev_base[current] + prev_base[current - 1]) / dxSquared;
+                    
+                     // neighbors in the vertical direction
+                    value += (prev_base[current + cols] - 2.0 * prev_base[current] + prev_base[current - cols]) / dySquared;
+                    
+                    value *= dtSquared * vel_base[current];
+                    
+                    next_base[current] = 2.0 * prev_base[current] - next_base[current] + value;
+                }
             }
-        }
 
-        // swap arrays for next iteration
-        swap = next_base;
-        next_base = prev_base;
-        prev_base = swap;
-
-        // save the wavefield for each 100 iterations
-        if (n % 100 == 0)
-        {
-            save_grid(rows, cols, next_base, n);
+            #pragma omp single
+            {
+                // swap arrays for next iteration
+                swap = next_base;
+                next_base = prev_base;
+                prev_base = swap;
+            }
         }
     }
 
-    // get the end time
     gettimeofday(&time_end, NULL);
 
-    double exec_time = (double)(time_end.tv_sec - time_start.tv_sec) + (double)(time_end.tv_usec - time_start.tv_usec) / 1000000.0;
+    double exec_time = (double) (time_end.tv_sec - time_start.tv_sec) + (double) (time_end.tv_usec - time_start.tv_usec) / 1000000.0;
 
-    save_grid(rows, cols, next_base, 6000);
-
-    printf("Executado em %f segundos com %d threads \n\n", exec_time, num_threads);
+    save_grid(rows, cols, next_base);
+    
+    printf("Iterations completed in %f seconds with %d threads \n\n", exec_time, num_threads);
 
     free(prev_base);
     free(next_base);
